@@ -1,353 +1,236 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mr Ayman Quiz</title>
+    <title>لوحة نتائج اختبارات أ. أيمن</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Cairo', sans-serif;
+            background-color: #f7f9fb; /* Light background */
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .container {
+            max-width: 90rem; /* Increased max width */
         }
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
+        .header-gradient {
+            background-image: linear-gradient(to right, #4c51bf, #6b46c1);
         }
-        .card label {
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-            display: block;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            background-color: #FFFFFF; /* White */
-            color: #1F2937; /* Gray-800 */
-            margin-bottom: 0.5rem;
-            border: 2px solid #E5E7EB; /* Gray-200 */
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        /* Custom scrollbar for table container */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
         }
-        .card label:hover {
-            background-color: #F9FAFB; /* Gray-50 */
-            border-color: #6366F1; /* Indigo-500 */
-        }
-        .card input[type="radio"] {
-            display: none;
-        }
-        .selected-answer {
-            background-color: #4338CA !important; /* Indigo-700 */
-            border-color: #A5B4FC !important; /* Indigo-300 */
-            color: white !important;
-        }
-        .correct-answer {
-            background-color: #10B981 !important; /* Green-500 */
-            color: white !important;
-            border-color: #34D399 !important; /* Green-400 */
-        }
-        .incorrect-answer {
-            background-color: #EF4444 !important; /* Red-500 */
-            color: white !important;
-            border-color: #F87171 !important; /* Red-400 */
-        }
-        .explanation {
-            background-color: #FFFBEB; /* Yellow-50 (very light) */
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-            border-left: 4px solid #F59E0B; /* Amber-500 */
-            color: #92400E; /* Amber-900 (dark text) */
-            animation: fadeIn 0.5s;
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: #a0aec0;
+            border-radius: 4px;
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col items-center p-4 sm:p-6">
+<body class="p-4 sm:p-8">
 
-    <header class="w-full max-w-4xl text-center bg-gradient-to-r from-blue-400 to-indigo-600 p-6 rounded-3xl shadow-xl mb-8 fade-in text-white">
-        <h1 class="text-4xl font-extrabold">امتحان الاريب</h1>
-        <p class="text-xl mt-2 opacity-95">بالتوفيق يا صديقي</p>
+    <header class="header-gradient text-white p-6 rounded-xl shadow-2xl mb-10 container mx-auto">
+        <h1 class="text-3xl sm:text-4xl font-extrabold">📊 لوحة النتائج العصرية</h1>
+        <p class="text-lg mt-2 opacity-90">عرض نتائج اختبارات الأريب - أستاذ أيمن</p>
     </header>
 
-    <main id="classSelection" class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl text-center fade-in border border-gray-200">
-        <h2 class="text-2xl font-bold mb-6 text-gray-800">اختر الصف الدراسي</h2>
-        <select id="classSelect" class="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-indigo-500 transition">
-            <option value="">-- اختر الصف --</option>
-            <option value="s1">أولى ثانوي</option>
-            <option value="s2">تانية ثانوي</option>
-            <option value="s3">تالتة ثانوي</option>
-        </select>
-        <button id="startBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg mt-6 transition transform hover:scale-[1.02] shadow-md">
-            ابدأ الاختبار
-        </button>
+    <main class="container mx-auto">
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100 mb-8">
+            <h2 class="text-xl font-bold mb-5 text-gray-800">تصفية النتائج</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                
+                <div class="col-span-full md:col-span-1">
+                    <label for="classFilter" class="block text-sm font-medium text-gray-700 mb-2">اختر الصف الدراسي</label>
+                    <select id="classFilter" class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        <option value="all">جميع الصفوف</option>
+                        <option value="s1">أولى ثانوي</option>
+                        <option value="s2">تانية ثانوي</option>
+                        <option value="s3">تالتة ثانوي</option>
+                    </select>
+                </div>
+
+                <div class="col-span-full md:col-span-1">
+                    <label for="nameSearch" class="block text-sm font-medium text-gray-700 mb-2">البحث بالاسم</label>
+                    <input type="text" id="nameSearch" placeholder="اسم الطالب كاملاً" class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+
+                <div class="col-span-full md:col-span-1">
+                    <label for="phoneSearch" class="block text-sm font-medium text-gray-700 mb-2">البحث برقم الهاتف</label>
+                    <input type="text" id="phoneSearch" placeholder="رقم الهاتف" class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+                
+                <div class="col-span-full md:col-span-1 flex items-end">
+                    <button id="applyFilterBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md">
+                        تطبيق الفلتر
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">قائمة النتائج (<span id="resultsCount">0</span> نتيجة)</h2>
+            <div class="table-container overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">#</th>
+                            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">الاسم</th>
+                            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">رقم الهاتف</th>
+                            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">الصف</th>
+                            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">الدرجة</th>
+                            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">تاريخ الإرسال</th>
+                            <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">أخطاء (ID)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500" id="loadingRow">... جاري تحميل النتائج ...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </main>
 
-    <section id="quizSection" class="hidden w-full max-w-4xl mt-8 fade-in">
-        <div class="bg-white p-6 rounded-2xl shadow-xl mb-6 border border-gray-200">
-            <input id="studentName" placeholder="اكتب اسمك هنا" class="w-full p-3 bg-gray-100 text-gray-900 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-purple-500 transition mb-4" required>
-            <input id="studentPhone" placeholder="اكتب رقم تليفونك هنا" class="w-full p-3 bg-gray-100 text-gray-900 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-purple-500 transition" required>
-        </div>
-        <form id="quizForm" class="space-y-6"></form>
-        <div id="result" class="mt-6 text-2xl font-bold text-center p-4 bg-green-50 text-green-800 rounded-2xl shadow-lg hidden border-l-8 border-green-400"></div>
-        <button id="submitBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg mt-6 transition transform hover:scale-[1.02] shadow-md">
-            إرسال الإجابات
-        </button>
-    </section>
-
-    <a href="https://wa.me/201284023841" target="_blank" class="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-full shadow-xl transition transform hover:scale-110 z-50 flex items-center space-x-2 space-x-reverse">
-        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM2 10a8 8 0 1116 0 8 8 0 01-16 0zm10.293-3.293a1 1 0 00-1.414 0L9 8.586 7.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l3-3a1 1 0 000-1.414z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
-        <span>تواصل مع المستر</span>
-    </a>
-    
-<footer style="
-    position: relative;
-    z-index: 9999;
-    text-align: center;
-    padding: 40px 0;
-    margin-top: 50px;
-    background: transparent;
-">
-    <div style="
-        background: rgba(255, 255, 255, 0.95);
-        color: #111;
-        max-width: 400px;
-        margin: 0 auto;
-        border-radius: 20px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        border: 1px solid #ddd;
-        padding: 25px;
-    ">
-        <p style="font-weight: 600; margin-bottom: 15px; font-size: 16px;">
-            صُمّم بواسطة 
-            <span style="color: #2563eb; font-weight: 700;">Abdelrahman Tarek</span>
-        </p>
-        <a href="https://wa.me/201094724932" target="_blank" 
-            style="
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                background: linear-gradient(to right, #2563eb, #3b82f6);
-                color: #fff;
-                font-weight: 600;
-                font-size: 14px;
-                padding: 10px 18px;
-                border-radius: 9999px;
-                text-decoration: none;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-                transition: all 0.3s;
-            "
-            onmouseover="this.style.background='linear-gradient(to right,#3b82f6,#60a5fa)'"
-            onmouseout="this.style.background='linear-gradient(to right,#2563eb,#3b82f6)'">
-            <i class="fa-solid fa-envelope"></i>
-            تواصل معنا
-        </a>
-    </div>
-</footer>
-
-<script>
-    // *************************************************************
-    // ** ⚠️ يجب تغيير هذه القيم إلى قيم مشروعك الحقيقية من Supabase ⚠️ **
-    // *************************************************************
-    const SUPABASE_URL = "https://arbbxmnjviryxkmhwdgk.supabase.co"; 
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyYmJ4bW5qdmlyeXhrbWh3ZGdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2OTU1NDEsImV4cCI6MjA3ODI3MTU0MX0.G-MsJtbQ1LlPZO-Vob6nKzdClHmOYu6RFOKi62FKKNk";
-    const TABLE_NAME = "quiz_results"; // اسم الجدول الذي أنشأته في PostgreSQL
-    // *************************************************************
-
-    // روابط شيتات الأسئلة (لا زلنا نستخدمها لجلب الأسئلة)
-    const SHEET_QUESTIONS_S1 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSTYxx9lPQBy4oQ7jzlWyV63ULDzYoQWNf8EWafFdvCwi5MybPNPVfwZIPbvQ3g0hgBoSk8a-NHZfKe/pub?gid=1953790047&single=true&output=csv";
-    const SHEET_QUESTIONS_S2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSTYxx9lPQBy4oQ7jzlWyV63ULDzYoQWNf8EWafFdvCwi5MybPNPVfwZIPbvQ3g0hgBoSk8a-NHZfKe/pub?gid=1322085670&single=true&output=csv";
-    const SHEET_QUESTIONS_S3 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSTYxx9lPQBy4oQ7jzlWyV63ULDzYoQWNf8EWafFdvCwi5MybPNPVfwZIPbvQ3g0hgBoSk8a-NHZfKe/pub?gid=778951923&single=true&output=csv";
-    // const scriptURL = "..." // رابط Google Script القديم مُلغى
-
-    let questions = [];
-    let correctAnswers = {};
-    let explanations = {};
-    let selectedClass = "";
-
-    const classNames = {
-        g1: "أولى إعدادي", g2: "تانية إعدادي", g3: "تالتة إعدادي",
-        s1: "أولى ثانوي", s2: "تانية ثانوي", s3: "تالتة ثانوي"
-    };
-
-    function getQuestionsSheetUrl(classKey) {
-        switch (classKey) {
-            case "s1": return SHEET_QUESTIONS_S1;
-            case "s2": return SHEET_QUESTIONS_S2;
-            case "s3": return SHEET_QUESTIONS_S3;
-            default: return SHEET_QUESTIONS_S1;
-        }
-    }
-
-    async function fetchCSV(url) {
-        const res = await fetch(url);
-        const text = await res.text();
-        const data = Papa.parse(text, { header: true, skipEmptyLines: true }).data;
-        return data.map(obj => {
-            obj.choices = [];
-            for (let i = 1; i <= 4; i++) {
-                if (obj[`choice_${i}`]) obj.choices.push(obj[`choice_${i}`]);
-            }
-            return obj;
-        });
-    }
-
-    document.getElementById("startBtn").addEventListener("click", async () => {
-        selectedClass = document.getElementById("classSelect").value;
-        if (!selectedClass) {
-            alert("من فضلك اختر الصف الدراسي أولاً");
-            return;
-        }
-
-        document.getElementById("startBtn").textContent = "جاري تحميل الأسئلة...";
-        document.getElementById("startBtn").disabled = true;
-
-        try {
-            const sheetUrl = getQuestionsSheetUrl(selectedClass);
-            questions = await fetchCSV(sheetUrl);
-            showQuestions();
-            document.getElementById("classSelection").classList.add("hidden");
-            document.getElementById("quizSection").classList.remove("hidden");
-        } catch (error) {
-            alert("حدث خطأ أثناء تحميل الأسئلة. حاول مرة أخرى.");
-            document.getElementById("startBtn").textContent = "ابدأ الاختبار";
-            document.getElementById("startBtn").disabled = false;
-        }
-    });
-
-    function showQuestions() {
-        const form = document.getElementById("quizForm");
-        form.innerHTML = "";
-        questions.forEach((q, index) => {
-            correctAnswers[q.id] = q.correct;
-            explanations[q.id] = q.explanation;
-
-            let choicesHtml = q.choices.map((c, idx) => `
-                <label>
-                    <input type="radio" name="${q.id}" value="${c}">
-                    <span>${c}</span>
-                </label>
-            `).join("");
-
-            let html = `
-                <div class="card bg-white p-5 rounded-2xl shadow-lg border border-gray-200 fade-in" style="animation-delay: ${index * 100}ms;">
-                    <p class="font-bold text-lg mb-4 text-gray-800">${index + 1}. ${q.question}</p>
-                    <div class="choices space-y-2">${choicesHtml}</div>
-                </div>
-            `;
-            form.innerHTML += html;
-        });
-            
-        // Add event listener for selecting answers
-        form.querySelectorAll('input[type="radio"]').forEach(radio => {
-            radio.addEventListener('change', (event) => {
-                // Remove selection from siblings
-                const parent = event.target.closest('.choices');
-                parent.querySelectorAll('label').forEach(label => label.classList.remove('selected-answer'));
-                // Add selection to current
-                event.target.parentElement.classList.add('selected-answer');
-            });
-        });
-    }
-
-    document.getElementById("submitBtn").addEventListener("click", async (e) => {
-        e.preventDefault();
-        const name = document.getElementById("studentName").value.trim();
-        const phone = document.getElementById("studentPhone").value.trim();
-        if (!name || !phone) {
-            alert("من فضلك اكتب الاسم ورقم التليفون للمتابعة");
-            return;
-        }
-
-        document.getElementById("submitBtn").disabled = true;
-        document.getElementById("submitBtn").textContent = "جاري التصحيح...";
-
-        let score = 0, wrong = [], total = questions.length;
-        questions.forEach(q => {
-            const selectedRadio = document.querySelector(`input[name="${q.id}"]:checked`);
-            const card = selectedRadio ? selectedRadio.closest(".card") : document.querySelector(`input[name="${q.id}"]`).closest('.card');
-            
-            // Highlight the correct answer
-            document.querySelectorAll(`input[name="${q.id}"]`).forEach(opt => {
-                const label = opt.parentElement;
-                label.classList.remove('selected-answer'); // Clear selection style
-                if (opt.value === q.correct) {
-                    label.classList.add('correct-answer');
-                }
-            });
-
-            if (selectedRadio) {
-                const selectedLabel = selectedRadio.parentElement;
-                if (selectedRadio.value === q.correct) {
-                    score++;
-                } else {
-                    // Set the incorrect answer style
-                    selectedLabel.classList.add('incorrect-answer');
-                    wrong.push(q.id);
-                    if (q.explanation) {
-                        const exp = document.createElement("div");
-                        exp.className = "explanation";
-                        exp.innerHTML = `<b>💡 الشرح:</b> ${q.explanation}`;
-                        card.appendChild(exp);
-                    }
-                }
-            } else {
-                // If not selected, it's considered wrong and show explanation
-                wrong.push(q.id);
-                if (q.explanation) {
-                    const exp = document.createElement("div");
-                    exp.className = "explanation";
-                    exp.innerHTML = `<b>💡 الشرح:</b> ${q.explanation}`;
-                    card.appendChild(exp);
-                }
-            }
-        });
-
-        const resultDiv = document.getElementById("result");
-        resultDiv.innerHTML = `✅ نتيجتك النهائية: ${score} / ${total}`;
-        resultDiv.classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        document.getElementById("submitBtn").style.display = 'none';
-
-        try {
-            // *************************************************************
-            // ** الكود الجديد لإرسال النتيجة إلى Supabase PostgreSQL **
-            // *************************************************************
-            const dataToSubmit = {
-                student_name: name,
-                student_phone: phone,
-                class_name: classNames[selectedClass],
-                score: score,
-                total_questions: total, 
-                wrong_questions_ids: wrong.join(',') 
-            };
-
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "apikey": SUPABASE_ANON_KEY, 
-                    "Prefer": "return=minimal"
-                },
-                body: JSON.stringify(dataToSubmit)
-            });
-
-            if (!response.ok) {
-                console.error('Failed to save result to Supabase:', response.status, response.statusText);
-                alert("تم تصحيح الاختبار، ولكن لم يتم تسجيل النتيجة في قاعدة البيانات بسبب خطأ فني.");
-            } else {
-                console.log('Result successfully saved to Supabase!');
-            }
-        } catch (error) {
-            console.error('An error occurred during API fetch:', error);
-            alert("تم تصحيح الاختبار، ولكن لم يتم تسجيل النتيجة في قاعدة البيانات بسبب خطأ في الشبكة.");
-        }
+    <script>
         // *************************************************************
-    });
-</script>
-</body>
+        // ** ⚠️ يجب تغيير هذه القيم إلى قيم مشروعك الحقيقية من Supabase ⚠️ **
+        // *************************************************************
+        const SUPABASE_URL = "https://arbbxmnjviryxkmhwdgk.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyYmJ4bW5qdmlyeXhrbWh3ZGdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2OTU1NDEsImV4cCI6MjA3ODI3MTU0MX0.G-MsJtbQ1LlPZO-Vob6nKzdClHmOYu6RFOKi62FKKNk";
+        const TABLE_NAME = "quiz_results";
+        // *************************************************************
 
+        const resultsTableBody = document.getElementById('resultsTableBody');
+        const resultsCountSpan = document.getElementById('resultsCount');
+        const classFilter = document.getElementById('classFilter');
+        const nameSearch = document.getElementById('nameSearch');
+        const phoneSearch = document.getElementById('phoneSearch');
+        const applyFilterBtn = document.getElementById('applyFilterBtn');
+
+        // خريطة لتحديد أسماء الصفوف
+        const classNamesMap = {
+            's1': 'أولى ثانوي',
+            's2': 'تانية ثانوي',
+            's3': 'تالتة ثانوي'
+        };
+
+        // دالة لجلب البيانات من Supabase
+        async function fetchResults() {
+            resultsTableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">... جاري تحميل النتائج ...</td></tr>';
+            resultsCountSpan.textContent = '0';
+            
+            // بناء الاستعلام (Query)
+            let url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?select=*&order=submission_time.desc`;
+            
+            const selectedClass = classFilter.value;
+            const searchName = nameSearch.value.trim();
+            const searchPhone = phoneSearch.value.trim();
+
+            // 1. فلترة الصف
+            if (selectedClass !== 'all') {
+                const className = classNamesMap[selectedClass];
+                // استخدام `eq` لفلترة القيمة بالضبط
+                url += `&class_name=eq.${className}`; 
+            }
+            
+            // 2. البحث بالاسم
+            if (searchName) {
+                // استخدام `ilike` للبحث الجزئي وغير الحساس لحالة الأحرف
+                url += `&student_name=ilike.*${searchName}*`;
+            }
+
+            // 3. البحث برقم الهاتف
+            if (searchPhone) {
+                // استخدام `ilike` للبحث الجزئي في الرقم
+                url += `&student_phone=ilike.*${searchPhone}*`;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        // هنا نطلب عدد الصفوف الكلي في الرأس
+                        'Prefer': 'count=exact' 
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                // الحصول على عدد النتائج الإجمالي من رأس الاستجابة
+                const totalCount = response.headers.get('content-range').split('/')[1];
+                const data = await response.json();
+                
+                displayResults(data);
+                resultsCountSpan.textContent = totalCount;
+
+            } catch (error) {
+                console.error('Error fetching data from Supabase:', error);
+                resultsTableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-red-500 font-bold">حدث خطأ في جلب البيانات: ${error.message}. تأكد من تفعيل سياسة القراءة (SELECT Policy).</td></tr>`;
+            }
+        }
+
+        // دالة لعرض البيانات في الجدول
+        function displayResults(results) {
+            resultsTableBody.innerHTML = '';
+            if (results.length === 0) {
+                resultsTableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">لا توجد نتائج مطابقة لشروط البحث.</td></tr>';
+                return;
+            }
+
+            results.forEach((result, index) => {
+                const percentage = ((result.score / result.total_questions) * 100).toFixed(0);
+                
+                // تحديد لون الدرجة بناءً على الأداء
+                let scoreColor = 'text-red-600';
+                if (percentage >= 80) {
+                    scoreColor = 'text-green-600 font-extrabold';
+                } else if (percentage >= 50) {
+                    scoreColor = 'text-yellow-600 font-bold';
+                }
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition duration-150';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">${result.student_name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${result.student_phone}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-indigo-600">${result.class_name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-lg ${scoreColor}">${result.score} / ${result.total_questions} (${percentage}%)</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(result.submission_time).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                    <td class="px-6 py-4 text-sm text-red-400 max-w-xs overflow-hidden text-ellipsis">${result.wrong_questions_ids || 'لا يوجد'}</td>
+                `;
+                resultsTableBody.appendChild(row);
+            });
+        }
+
+        // ربط حدث النقر بزر الفلتر
+        applyFilterBtn.addEventListener('click', fetchResults);
+        
+        // ربط حدث الإدخال بالبحث التلقائي (اختياري)
+        nameSearch.addEventListener('input', fetchResults);
+        phoneSearch.addEventListener('input', fetchResults);
+        
+        // ربط حدث تغيير الصف
+        classFilter.addEventListener('change', fetchResults);
+
+        // جلب النتائج عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', fetchResults);
+    </script>
+</body>
 </html>
+
+
+
+
+
+
+
