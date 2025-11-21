@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة إدارة النتائج والامتحانات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f7f9fb;
+        }
+        
+        .container {
+            max-width: 90rem;
+        }
+        
+        .header-gradient {
+            background-image: linear-gradient(to right, #4c51bf, #6b46c1);
+        }
+        
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: #a0aec0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="p-4 sm:p-8">
+
+    <header class="header-gradient text-white p-6 rounded-xl shadow-2xl mb-10 container mx-auto">
+        <h1 class="text-3xl sm:text-4xl font-extrabold">📊 لوحة الإدارة والنتائج</h1>
+        <p class="text-lg mt-2 opacity-90">مرحبًا أيمن - يمكنك إدارة الامتحانات وعرض النتائج من هنا</p>
+    </header>
+
+    <main class="container mx-auto">
+
+        <div class="mb-6 border-b border-gray-200">
+            <ul class="flex flex-wrap -mb-px" id="tabs" role="tablist">
+                <li class="mr-2" role="presentation">
+                    <button id="results-tab" class="inline-block p-4 border-b-2 border-indigo-600 rounded-t-lg font-bold text-indigo-600 hover:text-indigo-700 hover:border-indigo-400 transition" type="button" role="tab" aria-selected="true" onclick="showTab('results')">
+                        عرض النتائج
+                    </button>
+                </li>
+                <li class="mr-2" role="presentation">
+                    <button id="management-tab" class="inline-block p-4 border-b-2 border-transparent rounded-t-lg font-bold text-gray-500 hover:text-gray-600 hover:border-gray-300 transition" type="button" role="tab" aria-selected="false" onclick="showTab('management')">
+                        إدارة الامتحانات
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div id="results-content" class="tab-content">
+            <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100 mb-8">
+                <h2 class="text-xl font-bold mb-5 text-gray-800">تصفية النتائج</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="col-span-full md:col-span-1">
+                        <label for="classFilter" class="block text-sm font-medium text-gray-700 mb-2">اختر الصف الدراسي</label>
+                        <select id="classFilter" class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <option value="all">جميع الصفوف</option>
+                            <option value="s1">أولى ثانوي</option>
+                            <option value="s2">تانية ثانوي</option>
+                            <option value="s3">تالتة ثانوي</option>
+                        </select>
+                    </div>
+                    <div class="col-span-full md:col-span-1">
+                        <label for="nameSearch" class="block text-sm font-medium text-gray-700 mb-2">البحث بالاسم</label>
+                        <input type="text" id="nameSearch" placeholder="اسم الطالب كاملاً" class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                    </div>
+                    <div class="col-span-full md:col-span-1">
+                        <label for="phoneSearch" class="block text-sm font-medium text-gray-700 mb-2">البحث برقم الهاتف</label>
+                        <input type="text" id="phoneSearch" placeholder="رقم الهاتف" class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                    </div>
+                    <div class="col-span-full md:col-span-1 flex items-end">
+                        <button id="applyFilterBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md">
+                            تطبيق الفلتر
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">قائمة النتائج (<span id="resultsCount">0</span> نتيجة)</h2>
+                <div class="table-container overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">#</th>
+                                <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">الاسم</th>
+                                <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">رقم الهاتف</th>
+                                <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">الصف</th>
+                                <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">الدرجة</th>
+                                <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">تاريخ الإرسال</th>
+                                <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">أخطاء (ID)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody" class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="7" class="px-6 py-4 text-center text-gray-500" id="loadingRow">... جاري تحميل النتائج ...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="management-content" class="tab-content hidden">
+
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-gray-800">إدارة الامتحانات</h2>
+                <button id="showNewQuizFormBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition">
+                    + إضافة امتحان جديد
+                </button>
+            </div>
+
+            <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100 mb-8">
+                <h3 class="text-xl font-bold mb-4 text-gray-700">الامتحانات المسجلة</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">#</th>
+                                <th class="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">اسم الامتحان</th>
+                                <th class="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">الصف</th>
+                                <th class="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">عدد الأسئلة</th>
+                                <th class="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">الحالة</th>
+                                <th class="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">الإجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quizListTableBody" class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">... جاري تحميل الامتحانات ...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="newQuizSection" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-red-200 border-l-4 hidden">
+                <h3 class="text-xl font-bold mb-6 text-gray-800">إنشاء امتحان جديد</h3>
+                <form id="newQuizForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="newQuizName" class="block text-sm font-medium text-gray-700 mb-2">اسم الامتحان</label>
+                            <input type="text" id="newQuizName" required class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label for="newQuizClass" class="block text-sm font-medium text-gray-700 mb-2">الصف الدراسي</label>
+                            <select id="newQuizClass" required class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="">-- اختر الصف --</option>
+                                <option value="s1">أولى ثانوي</option>
+                                <option value="s2">تانية ثانوي</option>
+                                <option value="s3">تالتة ثانوي</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" id="startAddingQuestionsBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-md transition">
+                        إنشاء الامتحان والبدء في إضافة الأسئلة
+                    </button>
+                </form>
+            </div>
+
+            <div id="questionAdditionSection" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-green-200 border-l-4 mt-6 hidden">
+                <h3 class="text-xl font-bold mb-6 text-gray-800">إضافة السؤال <span id="currentQuestionNumber">1</span> إلى امتحان: <span id="currentQuizName" class="text-indigo-600"></span></h3>
+                <form id="newQuestionForm" class="space-y-4">
+                    <input type="hidden" id="currentQuizId">
+
+                    <div>
+                        <label for="questionText" class="block text-sm font-medium text-gray-700 mb-2">نص السؤال</label>
+                        <textarea id="questionText" rows="3" required class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="choiceA" class="block text-sm font-medium text-gray-700 mb-2">الاختيار أ</label>
+                            <input type="text" id="choiceA" required class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label for="choiceB" class="block text-sm font-medium text-gray-700 mb-2">الاختيار ب</label>
+                            <input type="text" id="choiceB" required class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label for="choiceC" class="block text-sm font-medium text-gray-700 mb-2">الاختيار ج</label>
+                            <input type="text" id="choiceC" required class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label for="choiceD" class="block text-sm font-medium text-gray-700 mb-2">الاختيار د</label>
+                            <input type="text" id="choiceD" required class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="correctAnswer" class="block text-sm font-medium text-gray-700 mb-2">الإجابة الصحيحة</label>
+                            <select id="correctAnswer" required class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="">-- اختر الإجابة الصحيحة --</option>
+                                <option value="A">الاختيار أ</option>
+                                <option value="B">الاختيار ب</option>
+                                <option value="C">الاختيار ج</option>
+                                <option value="D">الاختيار د</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="explanation" class="block text-sm font-medium text-gray-700 mb-2">شرح الإجابة (اختياري)</label>
+                            <input type="text" id="explanation" class="w-full bg-gray-100 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-md transition">
+                        حفظ السؤال والانتقال للسؤال التالي
+                    </button>
+                    <button type="button" id="finishQuizBtn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-lg shadow-md transition">
+                        إنهاء إضافة الأسئلة (والعودة للقائمة)
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        // *************************************************************
+        // ** ⚠️ يجب استبدال القيم Placeholder بمفاتيحك الحقيقية ⚠️ **
+        // *************************************************************
+        const SUPABASE_URL = "https://arbbxmnjviryxkmhwdgk.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_600CYy7_vZeuyI2_U_DhjA_ZY_NbS_W";
+        const SUPABASE_SERVICE_KEY = "sb_secret_kAb85rnIuWxfG5ambppniA_83vKcEwC"; // المفتاح السري!
+
+        const TABLE_RESULTS = "quiz_results";
+        const TABLE_QUIZZES = "quizzes";
+        const TABLE_QUESTIONS = "questions";
+        // *************************************************************
+
+        const resultsTableBody = document.getElementById('resultsTableBody');
+        const quizListTableBody = document.getElementById('quizListTableBody');
+        const resultsCountSpan = document.getElementById('resultsCount');
+        const classFilter = document.getElementById('classFilter');
+        const nameSearch = document.getElementById('nameSearch');
+        const phoneSearch = document.getElementById('phoneSearch');
+        const applyFilterBtn = document.getElementById('applyFilterBtn');
+        const newQuizSection = document.getElementById('newQuizSection');
+        const questionAdditionSection = document.getElementById('questionAdditionSection');
+        const newQuizForm = document.getElementById('newQuizForm');
+        const newQuestionForm = document.getElementById('newQuestionForm');
+        const showNewQuizFormBtn = document.getElementById('showNewQuizFormBtn');
+        const currentQuizNameSpan = document.getElementById('currentQuizName');
+        const currentQuizIdInput = document.getElementById('currentQuizId');
+        const currentQuestionNumberSpan = document.getElementById('currentQuestionNumber');
+        const finishQuizBtn = document.getElementById('finishQuizBtn');
+
+        let currentQuestionCount = 0;
+        const classNamesMap = {
+            's1': 'أولى ثانوي',
+            's2': 'تانية ثانوي',
+            's3': 'تالتة ثانوي',
+            'أولى ثانوي': 's1',
+            'تانية ثانوي': 's2',
+            'تالتة ثانوي': 's3'
+        };
+
+        // -----------------------------------------------------------
+        // 1. نظام التبويبات (Tabs) - تم تصحيح خطأ ReferenceError هنا
+        // -----------------------------------------------------------
+
+        // **ملاحظة:** تم إضافة الدالة window.showTab لضمان الوصول العالمي من HTML
+        window.showTab = function(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+            document.querySelectorAll('#tabs button').forEach(button => {
+                button.classList.remove('border-indigo-600', 'text-indigo-600');
+                button.classList.add('border-transparent', 'text-gray-500');
+            });
+
+            document.getElementById(`${tabName}-content`).classList.remove('hidden');
+            document.getElementById(`${tabName}-tab`).classList.add('border-indigo-600', 'text-indigo-600');
+            document.getElementById(`${tabName}-tab`).classList.remove('border-transparent', 'text-gray-500');
+
+            if (tabName === 'management') {
+                fetchQuizzes();
+            } else {
+                fetchResults();
+            }
+        }
+
+        // -----------------------------------------------------------
+        // 2. إدارة النتائج (عرض النتائج)
+        // -----------------------------------------------------------
+
+        async function fetchResults() {
+            resultsTableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">... جاري تحميل النتائج ...</td></tr>';
+            resultsCountSpan.textContent = '0';
+
+            let url = `${SUPABASE_URL}/rest/v1/${TABLE_RESULTS}?select=*&order=submission_time.desc`;
+
+            const selectedClass = classFilter.value;
+            const searchName = nameSearch.value.trim();
+            const searchPhone = phoneSearch.value.trim();
+
+            if (selectedClass !== 'all') {
+                const className = classNamesMap[selectedClass];
+                url += `&class_name=eq.${className}`;
+            }
+            if (searchName) {
+                url += `&student_name=ilike.*${searchName}*`;
+            }
+            if (searchPhone) {
+                url += `&student_phone=ilike.*${searchPhone}*`;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_SERVICE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                        'Prefer': 'count=exact'
+                    }
+                });
+
+                if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+
+                const totalCount = response.headers.get('content-range').split('/')[1];
+                const data = await response.json();
+
+                displayResults(data);
+                resultsCountSpan.textContent = totalCount;
+
+            } catch (error) {
+                console.error('Error fetching data from Supabase:', error);
+                resultsTableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-red-500 font-bold">حدث خطأ في جلب البيانات: ${error.message}. تأكد من استخدام مفتاح الخدمة (Service Key).</td></tr>`;
+            }
+        }
+
+        function displayResults(results) {
+            resultsTableBody.innerHTML = '';
+            if (results.length === 0) {
+                resultsTableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">لا توجد نتائج مطابقة لشروط البحث.</td></tr>';
+                return;
+            }
+
+            results.forEach((result, index) => {
+                const percentage = ((result.score / result.total_questions) * 100).toFixed(0);
+                let scoreColor = percentage >= 80 ? 'text-green-600 font-extrabold' : (percentage >= 50 ? 'text-yellow-600 font-bold' : 'text-red-600');
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition duration-150';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">${result.student_name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${result.student_phone}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-indigo-600">${result.class_name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-lg ${scoreColor}">${result.score} / ${result.total_questions} (${percentage}%)</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(result.submission_time).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                    <td class="px-6 py-4 text-sm text-red-400 max-w-xs overflow-hidden text-ellipsis">${result.wrong_questions_ids || 'لا يوجد'}</td>
+                `;
+                resultsTableBody.appendChild(row);
+            });
+        }
+
+        // -----------------------------------------------------------
+        // 3. إدارة الامتحانات (إضافة وتفعيل/إغلاق) - تم تصحيح خطأ SyntaxError هنا
+        // -----------------------------------------------------------
+
+        async function fetchQuizzes() {
+            quizListTableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">... جاري تحميل الامتحانات ...</td></tr>';
+            try {
+                // نطلب عدد الأسئلة كـ COUNT ضمن الاستعلام
+                const url = `${SUPABASE_URL}/rest/v1/${TABLE_QUIZZES}?select=id,quiz_name,class_name,is_active,created_at,questions(count)&order=created_at.desc`;
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_SERVICE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+                    }
+                });
+
+                if (!response.ok) throw new Error(response.statusText);
+                const quizzes = await response.json();
+
+                displayQuizzes(quizzes);
+
+            } catch (error) {
+                console.error('Error fetching quizzes:', error);
+                quizListTableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500 font-bold">خطأ في جلب قائمة الامتحانات: ${error.message}</td></tr>`;
+            }
+        }
+
+        function displayQuizzes(quizzes) {
+            quizListTableBody.innerHTML = '';
+            if (quizzes.length === 0) {
+                quizListTableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">لا توجد امتحانات مسجلة.</td></tr>';
+                return;
+            }
+
+            quizzes.forEach((quiz, index) => {
+                const isActive = quiz.is_active;
+                const statusText = isActive ? 'مفعل ✅' : 'مغلق 🔒';
+                const statusColor = isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                const buttonText = isActive ? 'إغلاق' : 'تفعيل';
+                const buttonColor = isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600';
+
+                // **تم تصحيح هذا السطر: استخدام Optional Chaining (.?) لحل خطأ SyntaxError**
+                const questionCount = quiz.questions[0] ? quiz.questions[0].count : 0;
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition duration-150';
+                row.innerHTML = `
+                    <td class="px-4 py-2 text-sm text-gray-500">${index + 1}</td>
+                    <td class="px-4 py-2 font-medium text-gray-900">${quiz.quiz_name}</td>
+                    <td class="px-4 py-2 text-sm text-indigo-600">${quiz.class_name}</td>
+                    <td class="px-4 py-2 text-sm text-gray-700 font-bold">${questionCount}</td>
+                    <td class="px-4 py-2 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">${statusText}</span>
+                    </td>
+                    <td class="px-4 py-2 text-center whitespace-nowrap">
+                        <button onclick="toggleQuizStatus(${quiz.id}, ${isActive})" class="text-white font-bold py-1 px-3 rounded-md transition ${buttonColor} text-sm">
+                            ${buttonText}
+                        </button>
+                    </td>
+                `;
+                quizListTableBody.appendChild(row);
+            });
+        }
+
+        async function toggleQuizStatus(quizId, currentStatus) {
+            if (!confirm(`هل أنت متأكد من تغيير حالة هذا الامتحان؟`)) return;
+
+            try {
+                const url = `${SUPABASE_URL}/rest/v1/${TABLE_QUIZZES}?id=eq.${quizId}`;
+                const newStatus = !currentStatus;
+
+                const response = await fetch(url, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_SERVICE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        is_active: newStatus
+                    })
+                });
+
+                if (!response.ok) throw new Error(response.statusText);
+
+                alert(`تم ${newStatus ? 'تفعيل' : 'إغلاق'} الامتحان بنجاح.`);
+                fetchQuizzes();
+
+            } catch (error) {
+                alert(`فشل في تغيير الحالة: ${error.message}`);
+                console.error('Error toggling quiz status:', error);
+            }
+        }
+
+        showNewQuizFormBtn.addEventListener('click', () => {
+            newQuizSection.classList.remove('hidden');
+            questionAdditionSection.classList.add('hidden');
+        });
+
+        newQuizForm.addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const quizName = document.getElementById('newQuizName').value.trim();
+            const classKey = document.getElementById('newQuizClass').value;
+            const className = classNamesMap[classKey];
+
+            if (!quizName || !className) {
+                alert('الرجاء إدخال اسم الصف واسم الامتحان.');
+                return;
+            }
+
+            const button = document.getElementById('startAddingQuestionsBtn');
+            button.textContent = '... جاري إنشاء الامتحان';
+            button.disabled = true;
+
+            try {
+                const url = `${SUPABASE_URL}/rest/v1/${TABLE_QUIZZES}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_SERVICE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify({
+                        quiz_name: quizName,
+                        class_name: className,
+                        is_active: false
+                    })
+                });
+
+                if (!response.ok) throw new Error(response.statusText);
+
+                const createdQuiz = await response.json();
+                const quizId = createdQuiz[0].id;
+
+                currentQuizIdInput.value = quizId;
+                currentQuizNameSpan.textContent = quizName;
+                currentQuestionCount = 0;
+                currentQuestionNumberSpan.textContent = currentQuestionCount + 1;
+
+                newQuizSection.classList.add('hidden');
+                questionAdditionSection.classList.remove('hidden');
+                newQuestionForm.reset();
+
+                alert(`تم إنشاء امتحان "${quizName}" بنجاح! ابدأ في إضافة الأسئلة.`);
+
+            } catch (error) {
+                alert(`فشل إنشاء الامتحان: ${error.message}`);
+                console.error('Error creating quiz:', error);
+            } finally {
+                button.textContent = 'إنشاء الامتحان والبدء في إضافة الأسئلة';
+                button.disabled = false;
+            }
+        });
+
+        newQuestionForm.addEventListener('submit', async(e) => {
+            e.preventDefault();
+
+            const quizId = currentQuizIdInput.value;
+            const button = e.submitter;
+            button.textContent = '... جاري حفظ السؤال';
+            button.disabled = true;
+
+            const questionData = {
+                quiz_id: parseInt(quizId),
+                question_text: document.getElementById('questionText').value.trim(),
+                choice_a: document.getElementById('choiceA').value.trim(),
+                choice_b: document.getElementById('choiceB').value.trim(),
+                choice_c: document.getElementById('choiceC').value.trim(),
+                choice_d: document.getElementById('choiceD').value.trim(),
+                correct_answer: document.getElementById('correctAnswer').value,
+                explanation: document.getElementById('explanation').value.trim()
+            };
+
+            if (!questionData.question_text || !questionData.correct_answer || !questionData.choice_a || !questionData.choice_b || !questionData.choice_c || !questionData.choice_d) {
+                alert("الرجاء ملء جميع حقول السؤال والاختيارات واختيار الإجابة الصحيحة.");
+                button.textContent = 'حفظ السؤال والانتقال للسؤال التالي';
+                button.disabled = false;
+                return;
+            }
+
+            try {
+                const url = `${SUPABASE_URL}/rest/v1/${TABLE_QUESTIONS}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_SERVICE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(questionData)
+                });
+
+                if (!response.ok) throw new Error(response.statusText);
+
+                currentQuestionCount++;
+                alert(`تم حفظ السؤال رقم ${currentQuestionCount} بنجاح.`);
+
+                newQuestionForm.reset();
+                currentQuestionNumberSpan.textContent = currentQuestionCount + 1;
+
+            } catch (error) {
+                alert(`فشل في حفظ السؤال: ${error.message}`);
+                console.error('Error adding question:', error);
+            } finally {
+                button.textContent = 'حفظ السؤال والانتقال للسؤال التالي';
+                button.disabled = false;
+            }
+        });
+
+        finishQuizBtn.addEventListener('click', () => {
+            if (currentQuestionCount === 0) {
+                if (!confirm("لم يتم إضافة أي أسئلة لهذا الامتحان. هل تريد إنهاء العملية والعودة؟")) return;
+            } else if (!confirm(`هل أنت متأكد من إنهاء إضافة الأسئلة للامتحان (${currentQuestionCount} سؤالاً)؟`)) {
+                return;
+            }
+
+            questionAdditionSection.classList.add('hidden');
+            newQuizForm.reset();
+            currentQuestionCount = 0;
+            fetchQuizzes();
+            alert('تم إنهاء عملية إضافة الأسئلة بنجاح. يمكنك تفعيل الامتحان من القائمة.');
+        });
+
+        // ربط أحداث التصفية للنتائج
+        applyFilterBtn.addEventListener('click', fetchResults);
+        nameSearch.addEventListener('input', fetchResults);
+        phoneSearch.addEventListener('input', fetchResults);
+        classFilter.addEventListener('change', fetchResults);
+
+        // التحميل المبدئي
+        document.addEventListener('DOMContentLoaded', () => {
+            window.showTab('results'); // البدء بعرض النتائج
+        });
+    </script>
+</body>
+
+</html>
